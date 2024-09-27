@@ -1,0 +1,46 @@
+server:
+  port: 8888                                               # Config Server Port for dev environment
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb                                # In-memory H2 database
+    username: sa
+    password: sa
+    driverClassName: org.h2.Driver                         # Accessible path for H2 console
+  h2:
+    console:
+      enabled: true                                        # Enable H2 console
+      path: /h2-console
+  jpa:
+    hibernate:
+      ddl-auto: none                                       # Disable Hibernate auto schema creation since we have schema.sql
+    show-sql: true                                         # Enable SQL logging
+    database-platform: org.hibernate.dialect.H2Dialect
+    defer-datasource-initialization: true
+
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/sudarshangawande98/c2n-config-repo.git  # Config repository URL
+          search-paths: "{application}/{profile}"                         # Dynamic path for fetching configurations based on service and profile
+          default-label: main                                             # Default branch to fetch configurations from
+      fail-fast: true                                                     # Fail startup if unable to connect to the repository
+
+#    bus:
+#      enabled: true                                                       # Enable Spring Cloud Bus
+#      kafka:
+#        bootstrap-servers: localhost:9092                                 # Kafka server address
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: bus-refresh, health, info, refresh                       # Expose specific actuator endpoints
+  security:
+    enabled: false                                                        # Disable security for actuator endpoints (use cautiously in production)
+
+#logging:
+#  level:
+#    org.springframework.cloud: INFO                                       # Set logging level to INFO for cloud components
+#    org.springframework.kafka: INFO                                       # Set logging level to INFO for Kafka components
