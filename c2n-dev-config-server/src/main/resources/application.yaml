@@ -27,10 +27,10 @@ spring:
           default-label: main                                             # Default branch to fetch configurations from
       fail-fast: true                                                     # Fail startup if unable to connect to the repository
 
-#    bus:
-#      enabled: true                                                       # Enable Spring Cloud Bus
-#      kafka:
-#        bootstrap-servers: localhost:9092                                 # Kafka server address
+    bus:
+      enabled: true                                                       # Enable Spring Cloud Bus
+      kafka:
+        bootstrap-servers: localhost:9092                                 # Kafka server address
 
 management:
   endpoints:
@@ -38,9 +38,14 @@ management:
       exposure:
         include: bus-refresh, health, info, refresh                       # Expose specific actuator endpoints
   security:
-    enabled: false                                                        # Disable security for actuator endpoints (use cautiously in production)
+    enabled: false
 
 #logging:
 #  level:
 #    org.springframework.cloud: INFO                                       # Set logging level to INFO for cloud components
 #    org.springframework.kafka: INFO                                       # Set logging level to INFO for Kafka components
+#    org.springframework.security: DEBUG
+
+
+
+

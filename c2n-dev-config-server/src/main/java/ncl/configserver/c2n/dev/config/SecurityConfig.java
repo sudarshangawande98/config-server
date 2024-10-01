@@ -2,6 +2,7 @@ package ncl.configserver.c2n.dev.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -10,35 +11,40 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import javax.sql.DataSource;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
 @Configuration
 @EnableWebSecurity
+@PropertySource(value = "classpath:security-config.yml", factory = YamlPropertySourceFactory.class)
 public class SecurityConfig {
+
+    private final SecurityRolesProperties securityRolesProperties;
+
+    // Inject SecurityRolesProperties to use role mappings from YAML
+    public SecurityConfig(SecurityRolesProperties securityRolesProperties) {
+        this.securityRolesProperties = securityRolesProperties;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests((requests) -> requests
-                        // Allow access to the H2 console without authentication
-                        .requestMatchers("/h2-console/**").permitAll()
+                .authorizeHttpRequests(requests -> {
+                    securityRolesProperties.getRoles().forEach(roleConfig -> {
+                        String path = roleConfig.get("path");
+                        String role = roleConfig.get("role");
+                        requests.requestMatchers(path).hasAuthority(role);  // Ensure hasAuthority is used
+                    });
 
-                        // Define role-based access for services and environments
-                        .requestMatchers("/c2n-margin-service/dev/**").hasRole("DEV_C2N_MARGIN_SERVICE")
-                        .requestMatchers("/c2n-margin-service/prod/**").hasRole("PROD_C2N_MARGIN_SERVICE")
-                        .requestMatchers("/c2n-cim-service/dev/**").hasRole("DEV_C2N_CIM_SERVICE")
-                        .requestMatchers("/c2n-cim-service/prod/**").hasRole("PROD_C2N_CIM_SERVICE")
+                    // Permit access to the H2 console without authentication
+                    requests.requestMatchers("/h2-console/**").permitAll();
 
-                        // Any other requests must be authenticated
-                        .anyRequest().authenticated()
-                )
-                // Enable HTTP Basic authentication
-                .httpBasic(withDefaults())
+                    // Permit access to the bus-refresh actuator endpoint without authentication
+                    requests.requestMatchers("/actuator/**").permitAll();
 
-                // Disable CSRF for non-production simplicity (enable in production)
+                    // Secure other endpoints by requiring authentication
+                    requests.anyRequest().authenticated();
+                })
+                .httpBasic()
+                .and()
                 .csrf(csrf -> csrf.disable())
-
-                // Disable X-Frame-Options to allow H2 console to work in a frame
                 .headers(headers -> headers.frameOptions().disable());
 
         return http.build();
@@ -46,7 +52,6 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService jdbcUserDetailsManager(DataSource dataSource) {
-        // Use JdbcUserDetailsManager to manage users in the database via JDBC
         return new JdbcUserDetailsManager(dataSource);
     }
 }

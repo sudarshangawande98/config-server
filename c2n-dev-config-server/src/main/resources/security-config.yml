@@ -1,0 +1,12 @@
+security:
+  roles:
+    - path: /c2n-margin-service/dev/**          # Existing
+      role: DEV_C2N_MARGIN_SERVICE
+    - path: /c2n-margin-service/prod/**
+      role: PROD_C2N_MARGIN_SERVICE
+    - path: /c2n-cim-service/dev/**
+      role: DEV_C2N_CIM_SERVICE
+    - path: /c2n-cim-service/prod/**
+      role: PROD_C2N_CIM_SERVICE
+    - path: /c2n-margin-service/dev/**    # Corrected path with slashes
+      role: DEV_C2N_MARGIN_SERVICE

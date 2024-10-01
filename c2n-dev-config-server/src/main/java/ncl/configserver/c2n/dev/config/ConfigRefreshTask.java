@@ -7,13 +7,13 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 /**
- * Scheduled task to refresh the configuration every 10 minutes
+ * Scheduled task to refresh the configuration every 1 minutes
  * by triggering the bus refresh endpoint.
  */
 @Component
 public class ConfigRefreshTask {
 
-    @Scheduled(fixedRate = 600000) // Run every 10 minutes (600000 milliseconds)
+    @Scheduled(fixedRate = 60000) // Run every 1 minutes (60000 milliseconds)
     public void refreshConfig() {
         try {
             // Trigger bus refresh using curl command
